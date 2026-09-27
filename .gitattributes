@@ -60,7 +60,7 @@
 *.spriteatlas           unity-yaml
 *.spriteatlasv2         unity-yaml
 *.terrainlayer          unity-yaml
-*.unity                 unity-yaml
+*.unity                 unity-yaml lockable
 
 # "physic" for 3D but "physics" for 2D
 *.physicMaterial        unity-yaml
@@ -77,14 +77,14 @@ Packages/packages-lock.json linguist-generated
 # 3D models
 *.3dm                   lfs
 *.3ds                   lfs
-*.blend                 lfs
+*.blend                 lfs lockable
 *.blend1                lfs
 *.c4d                   lfs
 *.collada               lfs
 *.dae                   lfs
 *.dxf                   lfs
-*.FBX                   lfs
-*.fbx                   lfs
+*.FBX                   lfs lockable
+*.fbx                   lfs lockable
 *.jas                   lfs
 *.lws                   lfs
 *.lxo                   lfs
@@ -129,7 +129,7 @@ Packages/packages-lock.json linguist-generated
 *.jpg                   lfs
 *.pict                  lfs
 *.png                   lfs
-*.psd                   lfs
+*.psd                   lfs lockable
 *.tga                   lfs
 *.tif                   lfs
 *.tiff                  lfs
