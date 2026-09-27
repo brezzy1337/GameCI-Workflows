@@ -41,15 +41,15 @@ env:
   UNITY_CLI_VERSION: 1.0.0-beta.11 # bump deliberately, after reading `unity changelog`
   UNITY_CLI_CHANNEL: beta
   UNITY_PROJECT_PATH: .
-  # Player-support modules for targets that aren't the runner's own platform. Empty: the Windows
-  # runners build Windows natively. A Linux runner would need windows-mono.
-  UNITY_MODULES: ''
+  # Player-support modules for targets that aren't the runner's own platform. The hosted Linux
+  # runners need windows-mono to build StandaloneWindows64. Empty it on a Windows self-hosted runner.
+  UNITY_MODULES: windows-mono
   BUILD_TARGET: StandaloneWindows64
   BUILD_NAME: GameCIWorkflows # Product Name without spaces
   # machine: license pre-activated on a self-hosted runner (see references/runner-setup.md)
   # file:    offline .ulf from UNITY_LICENSE_FILE_BASE64
   # serial:  Pro/Plus serial from UNITY_LICENSE_SERIAL, returned after every job
-  UNITY_LICENSE_MODE: machine # each runner PC's own Personal license
+  UNITY_LICENSE_MODE: file # Personal .ulf; switch to machine on a dedicated self-hosted box
   UNITY_FORMAT: github
   UNITY_NON_INTERACTIVE: '1'
   UNITY_NO_UPDATE_CHECK: '1'
@@ -59,7 +59,9 @@ jobs:
     name: Test (EditMode + PlayMode)
     # Fork PRs get no secrets and must never reach a self-hosted runner.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, windows, x64, unity]
+    # GitHub-hosted for now. Planned: a dedicated self-hosted build machine for stable
+    # (e.g. [self-hosted, windows, x64, unity]) with UNITY_LICENSE_MODE: machine.
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       UNITY_SERVICE_ACCOUNT_ID: ${{ secrets.UNITY_SERVICE_ACCOUNT_ID }}
@@ -203,7 +205,9 @@ jobs:
     name: Build (${{ github.ref_type == 'tag' && 'release' || 'playtest' }})
     needs: test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, windows, x64, unity]
+    # GitHub-hosted for now. Planned: a dedicated self-hosted build machine for stable
+    # (e.g. [self-hosted, windows, x64, unity]) with UNITY_LICENSE_MODE: machine.
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       UNITY_SERVICE_ACCOUNT_ID: ${{ secrets.UNITY_SERVICE_ACCOUNT_ID }}
