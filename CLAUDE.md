@@ -42,9 +42,13 @@ Editor commands, and static methods marked `[CliCommand]` become team commands.
   - PR into `stable` → EditMode + PlayMode tests (`Test (EditMode + PlayMode)` check).
   - Push to `stable` → tests, then a `StandaloneWindows64` playtest build (artifact kept 14 days).
   - `v*` tag → tests, then the release build (kept 90 days).
-- Runners: self-hosted on team members' Windows PCs, labels `[self-hosted, windows, x64, unity]`,
-  running as the owner's account. The workflow never installs anything on them. It verifies CLI
-  `1.0.0-beta.11` and Editor `6000.6.3f1` are present and fails with the fix command if not.
-- License mode `machine`: each runner PC's own Unity Personal license; CI never returns it.
-- `projectPath`: `.` · Secrets: `UNITY_SERVICE_ACCOUNT_ID`, `UNITY_SERVICE_ACCOUNT_SECRET`.
-- Fork PRs are skipped; this repo must stay private while runners are personal PCs.
+- Runners: GitHub-hosted `ubuntu-latest`. Each job installs CLI `1.0.0-beta.11`, Editor
+  `6000.6.3f1`, and the `windows-mono` module (Windows builds from Linux); the Editor download and
+  `Library/` are cached.
+- License mode `file`: a Unity Personal `.ulf`, base64'd into the `UNITY_LICENSE_FILE_BASE64` secret.
+- Planned: a dedicated self-hosted build machine for `stable` builds (level design and asset work),
+  switching to `runs-on: [self-hosted, windows, x64, unity]`, `UNITY_MODULES: ''`, and
+  `UNITY_LICENSE_MODE: machine`. Not teammates' personal PCs.
+- `projectPath`: `.` · Secrets: `UNITY_LICENSE_FILE_BASE64`, `UNITY_SERVICE_ACCOUNT_ID`,
+  `UNITY_SERVICE_ACCOUNT_SECRET`.
+- Fork PRs are skipped. Keep the repo private once a self-hosted runner is added.
