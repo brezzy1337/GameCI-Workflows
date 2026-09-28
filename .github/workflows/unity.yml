@@ -152,7 +152,8 @@ jobs:
           case "$UNITY_LICENSE_MODE" in
             machine) echo "Using the license already active on this runner." ;;
             file)
-              printf '%s' "$UNITY_LICENSE_FILE_BASE64" | base64 -d > "$RUNNER_TEMP/unity.ulf"
+              # Strip whitespace: secrets pasted from a wrapped terminal pick up spaces and newlines.
+              printf '%s' "$UNITY_LICENSE_FILE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/unity.ulf"
               unity license activate --file "$RUNNER_TEMP/unity.ulf"
               rm -f "$RUNNER_TEMP/unity.ulf" ;;
             serial) unity license activate --serial "$UNITY_LICENSE_SERIAL" ;;
