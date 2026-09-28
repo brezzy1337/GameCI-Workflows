@@ -56,7 +56,8 @@ Editor commands, and static methods marked `[CliCommand]` become team commands.
   Actions minutes for the length of each build.
 - Secrets: `UNITY_SERVICE_ACCOUNT_ID`, `UNITY_SERVICE_ACCOUNT_SECRET` (service account
   `github-actions-gameci-workflows`, role **Automation User** on this project).
-  Variables: `UBA_ORG_ID`, `UBA_PROJECT_ID` (`256ab3b6-68f3-4efe-b78a-9554dab59210`, Unity Cloud
-  project "GameCI Workflows"), `UBA_TARGET`.
+  Variables: `UBA_ORG_ID` (`2474071296604`, the org's genesisId), `UBA_PROJECT_ID`
+  (`11dc2766-aaf6-41b9-a1de-cb0ab4a06bc2`, the Unity Cloud project with DevOps enabled),
+  `UBA_TARGET` (`default-windows-desktop-64-bit`).
 - Fork PRs never run it. Later options: Pro/Plus + GitHub-hosted runners, or a self-hosted runner
   (the Unity CLI `machine`-mode workflow; see the devkit's `unity-init` skill).
