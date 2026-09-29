@@ -38,13 +38,26 @@ Editor commands, and static methods marked `[CliCommand]` become team commands.
 
 ## CI
 
-- Workflow: `.github/workflows/unity.yml` (Unity CLI, not GameCI).
-  - PR into `stable` → EditMode + PlayMode tests (`Test (EditMode + PlayMode)` check).
-  - Push to `stable` → tests, then a `StandaloneWindows64` playtest build (artifact kept 14 days).
-  - `v*` tag → tests, then the release build (kept 90 days).
-- Runners: self-hosted on team members' Windows PCs, labels `[self-hosted, windows, x64, unity]`,
-  running as the owner's account. The workflow never installs anything on them. It verifies CLI
-  `1.0.0-beta.11` and Editor `6000.6.3f1` are present and fails with the fix command if not.
-- License mode `machine`: each runner PC's own Unity Personal license; CI never returns it.
-- `projectPath`: `.` · Secrets: `UNITY_SERVICE_ACCOUNT_ID`, `UNITY_SERVICE_ACCOUNT_SECRET`.
-- Fork PRs are skipped; this repo must stay private while runners are personal PCs.
+- Workflow: `.github/workflows/cloud-build.yml` → `.github/scripts/uba-build.sh`. Builds run in
+  **Unity Build Automation** (UBA); GitHub Actions only starts them and reports back. Unity's build
+  machines hold the Editor license — Unity Personal can't activate on GitHub-hosted or other hosted
+  CI (offline activation is Enterprise/Industry only), which is why the Editor never runs in Actions.
+  - Push to `stable` → EditMode + PlayMode tests, then a `StandaloneWindows64` playtest build.
+  - `v*` tag (from `main`) → tests + release build.
+  - PR labeled `cloud-ci` → tests + build of the PR head (and again on each push while labeled).
+    Other PRs: run `unity test --affected --since origin/stable` locally before pushing.
+  - Results (test counts, status, failure log tail) are in the run summary; download builds from
+    Unity Dashboard → DevOps → Build Automation → Build History.
+- UBA target: one Windows target (`UBA_TARGET`) with auto-build **off**, tests on with "fail build
+  on test failure", max concurrent builds 1. The workflow queues runs per ref and never cancels a
+  build mid-run; canceling the Actions run by hand cancels the UBA build.
+- Budget: UBA free tier is 200 Windows minutes/month and the DevOps project locks when it's
+  exceeded; the workflow checks `free-tier-status` before starting. Polling also uses GitHub
+  Actions minutes for the length of each build.
+- Secrets: `UNITY_SERVICE_ACCOUNT_ID`, `UNITY_SERVICE_ACCOUNT_SECRET` (service account
+  `github-actions-gameci-workflows`, role **Automation User** on this project).
+  Variables: `UBA_ORG_ID` (`2474071296604`, the org's genesisId), `UBA_PROJECT_ID`
+  (`256ab3b6-68f3-4efe-b78a-9554dab59210`, Unity Cloud project "GameCI Workflows"),
+  `UBA_TARGET` (`default-windows-desktop-64-bit`).
+- Fork PRs never run it. Later options: Pro/Plus + GitHub-hosted runners, or a self-hosted runner
+  (the Unity CLI `machine`-mode workflow; see the devkit's `unity-init` skill).
