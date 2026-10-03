@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git * push *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr comment *)",
+      "Bash(gh pr edit *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh pr close *)",
+      "Bash(gh pr review *)",
+      "Bash(gh pr ready *)",
+      "Bash(gh * pr create *)",
+      "Bash(gh * pr comment *)",
+      "Bash(gh * pr edit *)",
+      "Bash(gh * pr merge *)",
+      "Bash(gh * pr close *)",
+      "Bash(gh * pr review *)",
+      "Bash(gh * pr ready *)",
+      "Bash(gh api *)",
+      "Bash(gh * api *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(env)",
+      "Bash(printenv)",
+      "Bash(printenv *)"
+    ]
+  }
+}

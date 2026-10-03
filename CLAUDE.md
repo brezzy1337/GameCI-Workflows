@@ -61,3 +61,37 @@ Editor commands, and static methods marked `[CliCommand]` become team commands.
   `UBA_TARGET` (`default-windows-desktop-64-bit`).
 - Fork PRs never run it. Later options: Pro/Plus + GitHub-hosted runners, or a self-hosted runner
   (the Unity CLI `machine`-mode workflow; see the devkit's `unity-init` skill).
+
+## Ship workflow
+
+`/ship` (`.claude/commands/ship.md`) runs a sequential pipeline on the current branch:
+preflight → open PR into `stable` → Discord post → review → CI (optional) → merge. The central
+thread owns the chain; the review lenses and `pr-author` are the claude-unity-devkit plugin's
+agents (`claude-unity-devkit:<name>`).
+
+- **Preflight**: `unity vcs doctor` (repo settings, ignore rules, LFS patterns, package pinning).
+  Also local EditMode tests (`unity test --affected`), but only on a machine with the Editor;
+  Codespaces have none. Package, DLL, or action changes go to
+  `dependency-auditor`. A red preflight stops the pipeline.
+- **Gate 1, open**: `pr-author` drafts the PR. `git push` and `gh pr create` need approval.
+- **Discord**: one message per PR, posted when it opens, linking to GitHub, where people review and
+  merge. Posted by `.claude/scripts/discord-notify.sh <pr-url>`, which reads the title and branches
+  from GitHub (the summary comes on stdin, never on the command line), with the webhook from the
+  `DISCORD_WEBHOOK_URL` env var (a Codespaces secret, or a local env var). Never commit or print the
+  webhook URL. A missing webhook only skips the post; a resumed run offers to send a skipped one.
+- **Review**: parallel read-only lenses, scaled to the diff. The central thread consolidates them
+  into one PR comment with a single verdict.
+- **CI**: asked per PR. The `cloud-ci` label runs UBA tests on the PR: roughly 5–20 min of the free
+  200 min/month per run, again on every push while labeled, plus the post-merge `stable` build. A
+  red `UBA build + tests` check is blocking. Without the label, tests first run on the post-merge
+  `stable` build.
+- **Gate 2, merge**: `gh pr merge --merge --delete-branch` needs approval. A PR merged on GitHub
+  instead is fine; re-running `/ship` sees it and stops.
+- **Resume**: re-running `/ship` on a branch with an open PR picks up at the first unfinished stage
+  (review, then CI, then merge) instead of opening a second PR.
+
+`.claude/settings.json` makes Claude Code ask before `git push`, `gh pr create/comment/edit/merge/
+close/review/ready`, and `gh api` (including forms with flags before the subcommand), and denies
+force-pushes and `env`/`printenv`. These prompts also apply in auto mode, but not when permissions
+are bypassed entirely (`--dangerously-skip-permissions`); branch protection on `stable` is the
+server-side backstop. Never work around a gate, red preflight, failing check, or blocking review.
